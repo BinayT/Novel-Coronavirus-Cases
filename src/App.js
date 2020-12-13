@@ -1,5 +1,11 @@
 import { useEffect, useState } from 'react';
-import { FormControl, MenuItem, Select } from '@material-ui/core';
+import {
+  Card,
+  CardContent,
+  FormControl,
+  MenuItem,
+  Select,
+} from '@material-ui/core';
 import axios from 'axios';
 
 import './App.css';
@@ -35,6 +41,7 @@ function App() {
       <div className='app__left'>
         <div className='app__header'>
           <h1>Novel-Corona-19</h1>
+
           <FormControl className='app__dropdown'>
             <Select
               variant='outlined'
@@ -56,8 +63,16 @@ function App() {
           <InfoBox title='Recovered' cases={5832} total={4523} />
           <InfoBox title='Deaths' cases={11645} total={2232} />
         </div>
+
         <Map />
       </div>
+
+      <Card className='app__left'>
+        <CardContent>
+          <h3>Live Cases by Country</h3>
+          <h3>Worldwide new cases</h3>
+        </CardContent>
+      </Card>
     </div>
   );
 }
