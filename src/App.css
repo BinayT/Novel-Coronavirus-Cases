@@ -18,6 +18,11 @@ body {
   margin-bottom: 20px;
   align-items: center;
 }
+.app__countryname {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+}
 
 .app__stats {
   display: flex;

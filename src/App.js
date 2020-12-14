@@ -11,18 +11,27 @@ import axios from 'axios';
 import './App.css';
 import InfoBox from './components/InfoBox';
 import Map from './components/Map';
+import Table from './components/Table/Table';
 
 function App() {
-  const [countries, setCountries] = useState([]);
-  const [country, setCountry] = useState('worldwide');
-  const [countryInfo, setCountryInfo] = useState([]);
+  const [countriesName, setCountriesName] = useState([]); // Gets the country names for dropdown
+  const [selectedCountry, setSelectedCountry] = useState('worldwide'); // Fetches the selected country to display on the dom
+  const [countryInfo, setCountryInfo] = useState({}); // Fetches the country info
+  const [countryName, setCountryName] = useState('WorldWide');
+  const [tableData, setTableData] = useState([]);
 
   useEffect(() => {
     async function getData() {
+      let fetchCountries = await axios.get(
+        'https://disease.sh/v3/covid-19/all'
+      );
+      setCountryInfo(fetchCountries.data);
+
       let { data } = await axios.get(
         'https://disease.sh/v3/covid-19/countries'
       );
-      setCountries(
+      setTableData(data.sort((a, b) => b.cases - a.cases));
+      setCountriesName(
         data.map((el) => ({
           name: el.country,
           value: el.countryInfo.iso2,
@@ -36,18 +45,12 @@ function App() {
     const selectedCountry = e.target.value;
     const url =
       selectedCountry === 'worldwide'
-        ? 'https://disease.sh/v3/covid-19/countries/all'
+        ? 'https://disease.sh/v3/covid-19/all'
         : `https://disease.sh/v3/covid-19/countries/${selectedCountry}`;
     const { data } = await axios.get(url);
-    setCountryInfo({
-      casesToday: data.todayCases,
-      deathsToday: data.todayDeaths,
-      recoveredToday: data.todayRecovered,
-      totalCases: data.cases,
-      totalDeaths: data.deaths,
-      totalRecovered: data.recovered,
-    });
-    setCountry(selectedCountry);
+    setCountryName(selectedCountry);
+    setCountryInfo(data);
+    setSelectedCountry(selectedCountry);
   };
 
   return (
@@ -59,11 +62,11 @@ function App() {
           <FormControl className='app__dropdown'>
             <Select
               variant='outlined'
-              value={country}
+              value={selectedCountry}
               onChange={onCountryChange}
             >
               <MenuItem value='worldwide'>Worldwide</MenuItem>
-              {countries.map((country) => (
+              {countriesName.map((country) => (
                 <MenuItem value={country.name} key={country.name}>
                   {country.name}, {country.value}
                 </MenuItem>
@@ -71,22 +74,24 @@ function App() {
             </Select>
           </FormControl>
         </div>
-
+        <div className='app__countryname'>
+          You're looking at live stats of --&gt; <h4>{countryName}</h4>
+        </div>
         <div className='app__stats'>
           <InfoBox
             title='CoronaVirus Cases'
-            cases={countryInfo.casesToday}
-            total={countryInfo.totalCases}
+            cases={countryInfo.todayCases}
+            total={countryInfo.cases}
           />
           <InfoBox
             title='Recovered'
-            cases={countryInfo.recoveredToday}
-            total={countryInfo.totalRecovered}
+            cases={countryInfo.todayRecovered}
+            total={countryInfo.recovered}
           />
           <InfoBox
             title='Deaths'
-            cases={countryInfo.deathsToday}
-            total={countryInfo.totalDeaths}
+            cases={countryInfo.todayDeaths}
+            total={countryInfo.deaths}
           />
         </div>
 
@@ -95,7 +100,8 @@ function App() {
 
       <Card className='app__right'>
         <CardContent>
-          <h3>Live Cases by Country</h3>
+          <h3 className={{ textAlign: 'center' }}>Live Cases by Country</h3>
+          <Table countries={tableData} />
           <h3>Worldwide new cases</h3>
         </CardContent>
       </Card>
