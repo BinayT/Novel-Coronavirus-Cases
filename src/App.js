@@ -12,6 +12,7 @@ import './App.css';
 import InfoBox from './components/InfoBox';
 import Map from './components/Map';
 import Table from './components/Table/Table';
+import LineGraph from './components/LineGraph';
 
 function App() {
   const [countriesName, setCountriesName] = useState([]); // Gets the country names for dropdown
@@ -30,7 +31,9 @@ function App() {
       let { data } = await axios.get(
         'https://disease.sh/v3/covid-19/countries'
       );
+
       setTableData(data.sort((a, b) => b.cases - a.cases));
+
       setCountriesName(
         data.map((el) => ({
           name: el.country,
@@ -103,6 +106,7 @@ function App() {
           <h3 className={{ textAlign: 'center' }}>Live Cases by Country</h3>
           <Table countries={tableData} />
           <h3>Worldwide new cases</h3>
+          <LineGraph />
         </CardContent>
       </Card>
     </div>
