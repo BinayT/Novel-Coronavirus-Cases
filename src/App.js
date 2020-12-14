@@ -9,8 +9,9 @@ import {
 import axios from 'axios';
 
 import './App.css';
+import 'leaflet/dist/leaflet.css';
 import InfoBox from './components/InfoBox';
-import Map from './components/Map';
+import Map from './components/Map/Map';
 import Table from './components/Table/Table';
 import LineGraph from './components/LineGraph';
 
@@ -20,6 +21,8 @@ function App() {
   const [countryInfo, setCountryInfo] = useState({}); // Fetches the country info
   const [countryName, setCountryName] = useState('WorldWide');
   const [tableData, setTableData] = useState([]);
+  const [mapCenter, setMapCenter] = useState([34.80746, -40.4796]);
+  const [mapZoom, setMapZoom] = useState(3);
 
   useEffect(() => {
     async function getData() {
@@ -50,11 +53,21 @@ function App() {
       selectedCountry === 'worldwide'
         ? 'https://disease.sh/v3/covid-19/all'
         : `https://disease.sh/v3/covid-19/countries/${selectedCountry}`;
-    const { data } = await axios.get(url);
-    setCountryName(selectedCountry);
-    setCountryInfo(data);
-    setSelectedCountry(selectedCountry);
+    await fetch(url)
+      .then((res) => res.json())
+      .then((data) => {
+        setMapCenter(
+          selectedCountry === 'worldwide'
+            ? [34.80746, -40.4796]
+            : [data.countryInfo.lat, data.countryInfo.long]
+        );
+        setMapZoom(selectedCountry === 'worldwide' ? 2.5 : 4);
+        setCountryName(selectedCountry);
+        setCountryInfo(data);
+        setSelectedCountry(selectedCountry);
+      });
   };
+  console.log('After-->', mapCenter);
 
   return (
     <div className='app'>
@@ -98,7 +111,7 @@ function App() {
           />
         </div>
 
-        <Map />
+        <Map center={mapCenter} zoom={mapZoom} />
       </div>
 
       <Card className='app__right'>
