@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import Axios from 'axios';
 import { Line } from 'react-chartjs-2';
 import numeral from 'numeral';
 
@@ -47,45 +46,50 @@ const options = {
   },
 };
 
-const LineGraph = ({ caseType = 'cases' }) => {
-  const [data, setData] = useState({});
-
-  const buildChartData = (data, caseType = 'cases') => {
-    const chartData = [];
-    let lastDataPoint;
-
-    for (let date in data.cases) {
-      if (lastDataPoint) {
-        const newData = {
-          x: date,
-          y: data[caseType][date] - lastDataPoint,
-        };
-        chartData.push(newData);
-      }
-      lastDataPoint = data[caseType][date];
+const buildChartData = (data, casesType) => {
+  let chartData = [];
+  let lastDataPoint;
+  for (let date in data.cases) {
+    if (lastDataPoint) {
+      let newDataPoint = {
+        x: date,
+        y: data[casesType][date] - lastDataPoint,
+      };
+      chartData.push(newDataPoint);
     }
-    return chartData;
-  };
+    lastDataPoint = data[casesType][date];
+  }
+  return chartData;
+};
+
+function LineGraph({ casesType = 'cases', ...props }) {
+  const [data, setData] = useState({});
 
   useEffect(() => {
     const fetchData = async () => {
-      const { data } = await Axios.get(
-        'https://disease.sh/v3/covid-19/historical/all?days=120'
-      );
-      const chartData = buildChartData(data, caseType);
-      setData(chartData);
+      await fetch('https://disease.sh/v3/covid-19/historical/all?lastdays=120')
+        .then((response) => {
+          return response.json();
+        })
+        .then((data) => {
+          let chartData = buildChartData(data, casesType);
+          setData(chartData);
+          // console.log(chartData);
+          // buildChart(chartData);
+        });
     };
+
     fetchData();
-  }, [caseType]);
+  }, [casesType]);
 
   return (
-    <div>
+    <div className={props.className}>
       {data?.length > 0 && (
         <Line
           data={{
             datasets: [
               {
-                backgroundColor: 'rgba(204,16,52,0.5)',
+                backgroundColor: 'rgba(204, 16, 52, 0.5)',
                 borderColor: '#CC1034',
                 data: data,
               },
@@ -96,6 +100,6 @@ const LineGraph = ({ caseType = 'cases' }) => {
       )}
     </div>
   );
-};
+}
 
 export default LineGraph;

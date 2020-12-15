@@ -7,7 +7,7 @@ import {
   Card,
   CardContent,
 } from '@material-ui/core';
-import InfoBox from './components/InfoBox';
+import InfoBox from './components/InfoBox/InfoBox';
 import LineGraph from './components/LineGraph';
 import Table from './components/Table/Table';
 import { prettyPrintStat } from './util';
@@ -54,26 +54,31 @@ function App() {
   // console.log(casesType);
 
   const onCountryChange = async (e) => {
-    const countryCode = e.target.value;
+    const selectedCountry = e.target.value;
 
     const url =
-      countryCode === 'worldwide'
+      selectedCountry === 'worldwide'
         ? 'https://disease.sh/v3/covid-19/all'
-        : `https://disease.sh/v3/covid-19/countries/${countryCode}`;
+        : `https://disease.sh/v3/covid-19/countries/${selectedCountry}`;
     await fetch(url)
       .then((response) => response.json())
       .then((data) => {
-        setInputCountry(countryCode);
+        setInputCountry(selectedCountry);
         setCountryInfo(data);
-        setMapCenter([data.countryInfo.lat, data.countryInfo.long]);
-        setMapZoom(4);
+        if (selectedCountry === 'worldwide') {
+          setMapCenter([34.80746, -40.4796]);
+          setMapZoom(2);
+        } else {
+          setMapCenter([data.countryInfo.lat, data.countryInfo.long]);
+          setMapZoom(4);
+        }
       });
   };
   return (
     <div className='app'>
       <div className='app__left'>
         <div className='app__header'>
-          <h1>COVID- 19 TRACKER</h1>
+          <h1>Novel Corona-19 Cases</h1>
           <FormControl className='app__dropdown'>
             <Select
               variant='outlined'
@@ -84,13 +89,10 @@ function App() {
               {countries.map((country) => (
                 <MenuItem value={country.value}>{country.name}</MenuItem>
               ))}
-              {/* <option value="worldwide">Worldwide</option>
-            <option value="worldwide">Option 1</option>
-            <option value="worldwide">Option 2</option>
-            <option value="worldwide">Option 3</option> */}
             </Select>
           </FormControl>
         </div>
+
         <div className='app__stats'>
           <InfoBox
             onClick={(e) => setCasesType('cases')}
