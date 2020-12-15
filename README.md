@@ -1,3 +1,7 @@
+#Novel Coronavirus cases live with chart and map
+Deployed Link : https://novel-corona-5043c.web.app/
+Techonologies used: ReactJs, ChartJs, Flexbox, disease.sh API, etc
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
